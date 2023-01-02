@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicles-deployment
+  namespace: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-vehicles
+  template:
+    metadata:
+      labels:
+        app: micro-vehicles
+    spec:
+      containers:
+        - image: mihoci10/rso-micro-vehicles:latest
+          name: micro-vehicles
+          env:
+            - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+              value: jdbc:postgresql://mouse.db.elephantsql.com/ngqftspo
+            - name: KUMULUZEE_DATASOURCES0_USERNAME
+              value: ngqftspo
+            - name: KUMULUZEE_DATASOURCES0_PASSWORD
+              value: WWlHHEMBct5haUNfaHnOCh9zxt4o_E-B
+            - name: KUMULUZEE_CONFIG_CONSUL_AGENT
+              value: 'http://10.244.0.14:8500'
+          ports:
+            - containerPort: 8081
+              name: server
+              protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-vehicles
+  namespace: ingress-nginx
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8081
+      protocol: TCP
+      targetPort: server
+  selector:
+    app: micro-vehicles
